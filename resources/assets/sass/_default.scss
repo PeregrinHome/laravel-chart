@@ -1,0 +1,48 @@
+/*// Small devices (landscape phones, 576px and up)*/
+@media (min-width: 576px) {
+  html, body {
+    font-size: 15px;
+  }
+}
+
+/*// Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) {
+  html, body {
+    font-size: 16px;
+  }
+}
+
+/*// Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) {
+  html, body {
+    font-size: 17px;
+  }
+}
+
+/*// Extra large devices (large desktops, 1200px and up)*/
+@media (min-width: 1200px) {
+  html, body {
+    font-size: 18px;
+  }
+}
+table tbody tr td{
+  vertical-align: top;
+}
+.link-solid{
+  &:hover, &:focus{
+    border-bottom: 1px solid;
+  }
+}
+p{
+  font-size: 1rem;
+}
+.p{
+  font-size: 1rem;
+}
+.modal .modal-footer .btn, .modal .modal-footer .btn-large, .modal .modal-footer .btn-flat{
+  margin: .5rem .5rem;
+}
+.refresh-token{
+  cursor: pointer;
+  user-select: none;
+}

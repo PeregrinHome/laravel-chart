@@ -1,0 +1,151 @@
+@import url(https://fonts.googleapis.com/icon?family=Material+Icons);/*// Small devices (landscape phones, 576px and up)*/
+
+@media (min-width: 576px) {
+  html,
+  body {
+    font-size: 15px;
+  }
+}
+
+/*// Medium devices (tablets, 768px and up)*/
+
+@media (min-width: 768px) {
+  html,
+  body {
+    font-size: 16px;
+  }
+}
+
+/*// Large devices (desktops, 992px and up)*/
+
+@media (min-width: 992px) {
+  html,
+  body {
+    font-size: 17px;
+  }
+}
+
+/*// Extra large devices (large desktops, 1200px and up)*/
+
+@media (min-width: 1200px) {
+  html,
+  body {
+    font-size: 18px;
+  }
+}
+
+table tbody tr td {
+  vertical-align: top;
+}
+
+.link-solid:hover,
+.link-solid:focus {
+  border-bottom: 1px solid;
+}
+
+p {
+  font-size: 1rem;
+}
+
+.p {
+  font-size: 1rem;
+}
+
+.modal .modal-footer .btn,
+.modal .modal-footer .btn-large,
+.modal .modal-footer .btn-flat {
+  margin: .5rem .5rem;
+}
+
+.d-flex {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.flex-wrap {
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+
+.flex-column {
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.align-items-start {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+}
+
+.align-items-center {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.align-items-end {
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+}
+
+.justify-content-start {
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+}
+
+.justify-content-center {
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.justify-content-end {
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+.modal__progress {
+  opacity: 0;
+  -webkit-transition: opacity .2s ease-in;
+  transition: opacity .2s ease-in;
+}
+
+.modal__progress.active {
+  opacity: 1;
+  -webkit-transition: opacity .2s ease-in;
+  transition: opacity .2s ease-in;
+}
+
+.list-devices-t-i-btn--w {
+  width: 90px;
+}
+
+.m-l-r-2px {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+body {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  min-height: 100vh;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+main {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 0 auto;
+          flex: 1 0 auto;
+}
+
