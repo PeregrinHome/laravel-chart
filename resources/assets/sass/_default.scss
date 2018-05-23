@@ -46,3 +46,14 @@ p{
   cursor: pointer;
   user-select: none;
 }
+
+.pagination{
+  @media (max-width: 670px){
+    >li{
+      display: none;
+    }
+    >li.pagination__arrow--first, >li.pagination__arrow--last, >li.pagination__current{
+      display: inline-block;
+    }
+  }
+}
