@@ -11,13 +11,14 @@
         </div>
     </header>
     <main>
-        @includeIf('templates.pagination',
-        [
-            'count_page' => $count_page,
-            'showPage' => $showPage,
-            'link' => '?page='
-        ])
+        {{--@includeIf('templates.pagination',--}}
+        {{--[--}}
+            {{--'count_page' => $count_page,--}}
+            {{--'showPage' => $showPage,--}}
+            {{--'link' => '?page='--}}
+        {{--])--}}
 
+        {{ $items->links() }}
         <div class="container">
             <div class="row">
                 <div class="col s12">
@@ -34,12 +35,12 @@
         </div>
 
         @includeIf('templates.modals.modal-all')
-
-        @includeIf('templates.pagination',
-        [
-            'count_page' => $count_page,
-            'showPage' => $showPage,
-            'link' => '?page='
-        ])
+        {{ $items->links() }}
+        {{--@includeIf('templates.pagination',--}}
+        {{--[--}}
+            {{--'count_page' => $count_page,--}}
+            {{--'showPage' => $showPage,--}}
+            {{--'link' => '?page='--}}
+        {{--])--}}
     </main>
 @endsection

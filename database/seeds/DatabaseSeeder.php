@@ -15,9 +15,9 @@ class DatabaseSeeder extends Seeder
 
         // На этом этапе регистрация пользователя, а только потом остальные сиды
 
-//        $this->call(DevicesTableSeeder::class);
+        $this->call(DevicesTableSeeder::class);
 //        $this->call(DataAliasesTableSeeder::class);
-        $this->call(DataTableSeeder::class);
+//        $this->call(DataTableSeeder::class);
 
 //        $this->call(GroupsGraphicsTableSeeder::class);
 

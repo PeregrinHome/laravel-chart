@@ -34,24 +34,26 @@ class DevicesController extends Controller
      */
     public function index(Request $request)
     {
-        if (View::exists('listDevices')) {
+//        if (View::exists('listDevices')) {
             //Исключил неправильный параметр - если передадут стоку, преобразование закончится не 0, а 1.
-            $page = (int)$request->query('page', '1');
-            $page = ($page == 0)? 1 : $page;
+//            $page = (int)$request->query('page', '1');
+//            $page = ($page == 0)? 1 : $page;
+//
+//            // Пагинация, по 10 элементов
+//
+//            $c = 10; // Количество показываемых элементов
+//
+//            $devices = Device::all()->where('user_id', Auth::user()->id)->splice(($c * $page - $c), $c);
+//            $count = Device::all()->where('user_id', Auth::user()->id)->count();
 
-            // Пагинация, по 10 элементов
-
-            $c = 10; // Количество показываемых элементов
-
-            $devices = Device::all()->where('user_id', Auth::user()->id)->splice(($c * $page - $c), $c);
-            $count = Device::all()->where('user_id', Auth::user()->id)->count();
+            $devices = Device::paginate(10);
 
             return view('listDevices', [
-                'count_page' => (int)ceil($count/$c),
-                'showPage' => $page,
+//                'count_page' => (int)ceil($count/$c),
+//                'showPage' => $page,
                 'items' => $devices
             ]);
-        }
+//        }
     }
     public function getPageCreater()
     {
