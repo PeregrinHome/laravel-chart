@@ -28,15 +28,11 @@ class GraphicsController extends Controller
     public function getPageCreater(Request $request)
     {
 
-        $devices = Device::all()->where('user_id', Auth::user()->id);
-
+        $types = Auth::user()->allTypes()->get();
+        //TODO: По хорошему нужно исправить, но так лень еще и фронт перекапывать, так что пока и так сойдет.
         $subArr = [];
-        foreach ($devices as $device){
-            if(TypeData::all()->where('device_id', $device->id)->count() != 0){
-                foreach (TypeData::all()->where('device_id', $device->id) as $type){
-                    array_push($subArr, [ 'id' => $type->alias, 'name' => $type->name ]);
-                }
-            }
+        foreach ($types as $type){
+            $subArr[] = [ 'id' => $type->alias, 'name' => $type->name ];
         }
 
         return view('createTimeGraphic', [
@@ -48,32 +44,28 @@ class GraphicsController extends Controller
     }
     public function getPageUpdata(Request $request, $alias)
     {
-        $devices = Device::all()->where('user_id', Auth::user()->id);
+        $time_graphic = Auth::user()->graphics()->where('alias', $alias)->get()->first();
 
-        $time_graphic = TimeGraphic::where('user_id', Auth::user()->id)->where('alias', $alias)->firstOrFail();
+        $lines_time_graphic = LineTimeGraphic::where('graphics_id', $time_graphic->id)->get();
 
-        $lines_time_graphic = LineTimeGraphic::all()->where('graphics_id', $time_graphic->id);
+        $favorite_time_graphic = FavoriteTimeGraphics::where('time_graphic_id', $time_graphic->id)->get()->count();
 
-        $favorite_time_graphic_count = FavoriteTimeGraphics::all()->where('time_graphic_id', $time_graphic->id)->count();
-
+        //TODO: Тут тоже нужно будет паправить.
+        $types = Auth::user()->allTypes()->get();
         $subArr = [];
-        foreach ($devices as $device){
-            if(TypeData::all()->where('device_id', $device->id)->count() != 0){
-                foreach (TypeData::all()->where('device_id', $device->id) as $type){
-                    array_push($subArr, [ 'id' => $type->alias, 'name' => $type->name ]);
-                }
-            }
+        foreach ($types as $type){
+            $subArr[] = [ 'id' => $type->alias, 'name' => $type->name ];
         }
+
         Date::setLocale('ru');
         return view('createTimeGraphic', [
             'title' => 'Изменение графика',
             'types_data_JSON' => Json::encode($subArr),
             'types_data' => $subArr,
             'timegraphic_id' => $time_graphic->id,
-            'favorite_time_graphic' => (($favorite_time_graphic_count != 0)? 'checked': null),
+            'favorite_time_graphic' => (($favorite_time_graphic != 0)? 'checked': null),
             'name' => $time_graphic->name,
             'alias' => $time_graphic->alias,
-//            'border_time' => (($time_graphic->border_time != 0)?((new Date($time_graphic->border_time, new DateTimeZone('Europe/Moscow')))->format('d-m-Y')): null),
             'border_time' => (($time_graphic->border_time != 0)?((new Date($time_graphic->border_time))->format('d-m-Y')): null),
             'description' => $time_graphic->description,
             'lines_time_graphic' => $lines_time_graphic,
@@ -82,7 +74,7 @@ class GraphicsController extends Controller
     }
     public function showGraphic(Request $request, $alias)
     {
-        $time_graphic = TimeGraphic::where('user_id', Auth::user()->id)->where('alias', $alias)->firstOrFail();
+        $time_graphic = Auth::user()->graphics()->where('alias', $alias)->get()->first();
 
 
         return view('showGraphic', [
