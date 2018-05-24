@@ -27,7 +27,7 @@ class TypesDataController extends Controller
     }
     public function getPageCreater()
     {
-        $devices = Device::all()->where('user_id', Auth::user()->id);
+        $devices = Auth::user()->devices()->get();
 
         return view('createTypeOfDevice', [
             'title' => 'Создание типа данных',
@@ -41,25 +41,27 @@ class TypesDataController extends Controller
     }
     public function getPageUpdate($alias)
     {
+        $type = Auth::user()->allTypes()->where('alias', $alias)->get()->first();
 
-        $type = TypeData::where('alias', $alias)->firstOrFail();
+        $devices = Auth::user()->devices()->get();
 
-        $device = Device::where('id', $type->device_id)->where('user_id', Auth::user()->id)->firstOrFail();
-
-        $devices = Device::all()->where('user_id', Auth::user()->id);
-
-        return view('createTypeOfDevice', [
-            'title' => 'Устройство '.$type->name,
-            'type' => 'PUT',
-            'devices' => $devices,
-            'device' => $device,
-            'typeofdevice_id' => $type->id,
-            'name' => $type->name,
-            'alias' => $type->alias,
-            'description' => $type->description
-        ]);
+        if($type && $devices){
+            $device = $devices->find($type->device_id);
+            return view('createTypeOfDevice', [
+                'title' => 'Тип данных '.$type->name,
+                'type' => 'PUT',
+                'devices' => $devices,
+                'device' => $device,
+                'typeofdevice_id' => $type->id,
+                'name' => $type->name,
+                'alias' => $type->alias,
+                'description' => $type->description
+            ]);
+        }else{
+            return view('404');
+        }
     }
-    public function showTypeData(Request $request, $device_id, $alias_type)
+    public function showTypeData($device_id, $alias_type)
     {
         $device = Auth::user()->device($device_id);
         $type = Auth::user()->typeOfDevice($device_id, $alias_type)->get()->first();
@@ -74,10 +76,10 @@ class TypesDataController extends Controller
         }
         return view('404');
     }
-    public function showAllTypeData(Request $request, $alias_type){
+    public function showAllTypeData($alias_type){
 
 
-        foreach (Auth::user()->devices as $device){
+        foreach (Auth::user()->devices()->get() as $device){
 
             $type = $device->typeData($alias_type)->get()->first();
             if($type){

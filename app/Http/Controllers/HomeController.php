@@ -29,41 +29,30 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
 
-//        dump(Device::all()->slice(0, 10));
-//        dump(TypeData::all()->slice(0, 10));
-//        dump(User::all()->slice(0, 10));
-//        dump(Data::all()->slice(0, 10));
-//        dump(TimeGraphic::all()->slice(0, 10));
-//        dump(LineTimeGraphic::all()->slice(0, 10));
-//        dump(FavoriteTimeGraphics::all()->slice(0, 10));
-        if (View::exists('home')) {
-            return view('home', ['title' => env('SITE_TITLE'), 'nav_items' =>
+        return view('home', ['title' => env('SITE_TITLE'), 'nav_items' =>
+            [
                 [
-                    [
-                        'name' => 'Графики',
-                        'link' => '/login'
-                    ],
-                    [
-                        'name' => 'Типы данных',
-                        'link' => '/register'
-                    ]
+                    'name' => 'Графики',
+                    'link' => '/login'
+                ],
+                [
+                    'name' => 'Типы данных',
+                    'link' => '/register'
                 ]
-            ]);
-        }
+            ]
+        ]);
 
     }
-    public function home(Request $request){
+    public function home(){
 
         $subarray = [];
-        foreach (TimeGraphic::all()->where('user_id', Auth::user()->id) as $time_graphic){
-
-            if(FavoriteTimeGraphics::all()->where('time_graphic_id', $time_graphic->id)->count() == 1){
-                array_push($subarray, ['id' => $time_graphic->id, 'name' => $time_graphic->name]);
+        foreach (Auth::user()->graphics()->get() as $time_graphic){
+            if(FavoriteTimeGraphics::where('time_graphic_id', $time_graphic->id)->get()->first()){
+                $subarray[] = ['id' => $time_graphic->id, 'name' => $time_graphic->name];
             }
-
         }
 
         return view('showGraphic', [

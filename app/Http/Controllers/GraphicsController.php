@@ -17,7 +17,7 @@ use Psy\Util\Json;
 
 class GraphicsController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         $graphics = Auth::user()->graphics()->paginate(10);
         return view('listGraphics', [
@@ -25,7 +25,7 @@ class GraphicsController extends Controller
             'items' => $graphics
         ]);
     }
-    public function getPageCreater(Request $request)
+    public function getPageCreater()
     {
 
         $types = Auth::user()->allTypes()->get();
@@ -42,7 +42,7 @@ class GraphicsController extends Controller
             'type' => 'POST'
         ]);
     }
-    public function getPageUpdata(Request $request, $alias)
+    public function getPageUpdata($alias)
     {
         $time_graphic = Auth::user()->graphics()->where('alias', $alias)->get()->first();
 
@@ -72,10 +72,9 @@ class GraphicsController extends Controller
             'type' => 'PUT'
         ]);
     }
-    public function showGraphic(Request $request, $alias)
+    public function showGraphic($alias)
     {
         $time_graphic = Auth::user()->graphics()->where('alias', $alias)->get()->first();
-
 
         return view('showGraphic', [
             'type' => 'simple',

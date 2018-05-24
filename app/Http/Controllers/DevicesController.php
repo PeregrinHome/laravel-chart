@@ -35,7 +35,7 @@ class DevicesController extends Controller
      */
     public function index(Request $request)
     {
-        $devices = Device::where('user_id', Auth::user()->id)->paginate(10);
+        $devices = Auth::user()->devices()->paginate(10);
         return view('listDevices', [
             'items' => $devices
         ]);
@@ -52,9 +52,9 @@ class DevicesController extends Controller
     }
     public function getPageUpdate($id_device)
     {
-        if(Device::all()->where('id', $id_device)->where('user_id', Auth::user()->id)->count() == 1){
-            $device = Device::where('id', $id_device)->firstOrFail();
+        $device = Auth::user()->device($id_device);
 
+        if($device){
             return view('createDevice', [
                 'title' => 'Устройство '.$device->name,
                 'type' => 'PUT',
@@ -64,7 +64,6 @@ class DevicesController extends Controller
                 'description' => $device->description
             ]);
         }else{
-
             return view('404', [
                 'title' => 'Устройство не найдено.'
             ]);

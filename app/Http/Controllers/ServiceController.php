@@ -67,10 +67,10 @@ class ServiceController extends Controller
                 return response()->json(ServiceController::updateDevice(Auth::user()->id, $request->all('token', 'device_id', 'description', 'name')));
                 break;
             case 'typeofdevice':
-                return response()->json(ServiceController::updateTypeOfData(Auth::user()->id, $request->all('alias', 'device_id', 'description', 'name', 'typeofdevice_id')));
+                return response()->json(ServiceController::updateTypeOfData(Auth::user(), $request->all('alias', 'device_id', 'description', 'name', 'typeofdevice_id')));
                 break;
             case 'timegraphic':
-                return response()->json(ServiceController::updateTimeGraphic(Auth::user()->id, $request->all()));
+                return response()->json(ServiceController::updateTimeGraphic(Auth::user(), $request->all()));
                 break;
             default:
 //                return response()->json(['res' => 'fail']);
@@ -241,31 +241,26 @@ class ServiceController extends Controller
         }
     }
 
-    public function updateTimeGraphic($user_id, $all)
+    public function updateTimeGraphic($user, $all)
     {
-        $time_graphic = TimeGraphic::where('id', $all['timegraphic_id'])->where('user_id', $user_id)->firstOrFail();
-        if($time_graphic->alias == $all['alias'] || ($time_graphic->alias != $all['alias'] && TimeGraphic::all()->where('user_id', $user_id)->where('alias', $all['alias'])->count() == 0)){
-//            $time_graphic->update(['alias' => $all['alias'], 'name' => $all['name'], 'description' => $all['description'], 'border_time' => (($all['border_time'] == null)? 0 : ((new Date($all['border_time'].' 00:00:00', new DateTimeZone('Europe/Moscow')))->format('U')))]);
+        $time_graphic = TimeGraphic::where('id', $all['timegraphic_id'])->where('user_id', $user->id)->firstOrFail();
+        if($time_graphic->alias == $all['alias'] || ($time_graphic->alias != $all['alias'] && TimeGraphic::where('user_id', $user->id)->where('alias', $all['alias'])->get()->count() == 0)){
             $time_graphic->update(['alias' => $all['alias'], 'name' => $all['name'], 'description' => $all['description'], 'border_time' => (($all['border_time'] == null)? 0 : ((new Date($all['border_time'].' 00:00:00'))->format('U')))]);
-            foreach (LineTimeGraphic::all()->where('graphics_id', $time_graphic->id) as $line_time_graphic){
-                LineTimeGraphic::destroy($line_time_graphic->id);
-            }
+            LineTimeGraphic::where('graphics_id', $time_graphic->id)->delete();
             if(! empty($all['time_line']) ){
 
                 for($i = 0; $i < count($all['time_line']); $i += 3){
 
-                    LineTimeGraphic::firstOrCreate(['graphics_id' => $time_graphic->id, 'name' => $all['time_line'][$i], 'data_alias' => $all['time_line'][$i+1], 'color' => $all['time_line'][$i+2]]);
+                    LineTimeGraphic::create(['graphics_id' => $time_graphic->id, 'name' => $all['time_line'][$i], 'data_alias' => $all['time_line'][$i+1], 'color' => $all['time_line'][$i+2]]);
 
                 }
 
             }
 
-            foreach (FavoriteTimeGraphics::all()->where('time_graphic_id', $time_graphic->id) as $favorite_time_graphics){
-                FavoriteTimeGraphics::destroy($favorite_time_graphics->id);
-            }
+            FavoriteTimeGraphics::where('time_graphic_id', $time_graphic->id)->delete();
 
             if(! empty($all['favorites']) ){
-                FavoriteTimeGraphics::firstOrCreate(['time_graphic_id' => $time_graphic->id]);
+                FavoriteTimeGraphics::create(['time_graphic_id' => $time_graphic->id]);
             }
 
             return [
@@ -287,23 +282,37 @@ class ServiceController extends Controller
 
     }
 
-    public function updateTypeOfData($user_id, $all){
+    public function updateTypeOfData($user, $all){
 
-        $target = TypeData::where('id', $all['typeofdevice_id'])->firstOrFail();
+            $type = $user->allTypes()->find($all['typeofdevice_id']);
+            $device = $user->device($all['device_id']);
+            if($type && $device){
+                $type->update(['device_id' => $device->id, 'name' => $all['name'], 'description' => $all['description'], 'alias' => $all['alias']]);
+                return [
+                    'res' => 'ok',
+                    'callback' => [
+                        'type' => 'confirmed'
+                    ],
+                    'mes' => 'Тип данных "' . $all['name'] . '" обновлено!'
+                ];
+            }else{
+                return [
+                    'res' => 'ok',
+                    'callback' => [
+                        'type' => 'notconfirmed'
+                    ],
+                    'mes' => 'Обновить тип данных не удалось!'
+                ];
+            }
+//        $target = TypeData::where('id', $all['typeofdevice_id'])->firstOrFail();
+//
+//        Device::where('id', $target->device_id)->where('user_id', $user_id)->firstOrFail();
+//
+//        $device = Device::where('id', $all['device_id'])->where('user_id', $user_id)->firstOrFail();
+//
+//        $target->update(['device_id' => $device->id, 'name' => $all['name'], 'description' => $all['description'], 'alias' => $all['alias']]);
 
-        Device::where('id', $target->device_id)->where('user_id', $user_id)->firstOrFail();
 
-        $device = Device::where('id', $all['device_id'])->where('user_id', $user_id)->firstOrFail();
-
-        $target->update(['device_id' => $device->id, 'name' => $all['name'], 'description' => $all['description'], 'alias' => $all['alias']]);
-
-        return [
-            'res' => 'ok',
-            'callback' => [
-                'type' => 'confirmed'
-            ],
-            'mes' => 'Тип данных "' . $all['name'] . '" обновлено!'
-        ];
     }
 
     public function getToken($user_id, $device_id, $target)

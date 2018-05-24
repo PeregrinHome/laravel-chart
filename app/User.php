@@ -31,6 +31,10 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Device');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function graphics()
     {
         return $this->hasMany('App\TimeGraphic');
