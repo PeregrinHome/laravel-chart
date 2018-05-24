@@ -14,26 +14,13 @@ class TypesDataController extends Controller
 {
     public function index(Request $request, $device_id)
     {
-        if (View::exists('listTypesOfDevice')) {
-            //Исключил неправильный параметр - если передадут стоку, преобразование закончится не 0, а 1.
-            $page = (int)$request->query('page', '1');
-            $page = ($page == 0)? 1 : $page;
-
-            // Пагинация, по 10 элементов
-
-            $c = 10; // Количество показываемых элементов
-
-            $device = Device::where('id', $device_id)->where('user_id', Auth::user()->id)->firstOrFail();
-
-            $types = TypeData::all()->where('device_id', $device->id)->splice(($c * $page - $c), $c);
-            $count = TypeData::all()->where('device_id', $device->id)->count();
-
+//        dd(Auth::user()->typesOfDevice($device_id)->get());
+        $device = Auth::user()->device($device_id);
+        if($device){
+            $types = $device->typesData()->paginate(10);
             return view('listTypesOfDevice', [
-                'count_page' => (int)ceil($count/$c),
                 'title' => 'Типы данных "'.$device->name.'".',
-                'showPage' => $page,
                 'device_id' => $device->id,
-//                'device_name' => $device->name,
                 'items' => $types
             ]);
         }
@@ -74,100 +61,49 @@ class TypesDataController extends Controller
     }
     public function showTypeData(Request $request, $device_id, $alias_type)
     {
-        if (View::exists('listDataOfType')) {
-            //Исключил неправильный параметр - если передадут стоку, преобразование закончится не 0, а 1.
-            $page = (int)$request->query('page', '1');
-            $page = ($page == 0)? 1 : $page;
-
-            // Пагинация, по 50 элементов
-            $c = 50; // Количество показываемых элементов
-
-            $device = Device::where('id', $device_id)->where('user_id', Auth::user()->id)->firstOrFail();
-            $type = TypeData::where('alias', $alias_type)->where('device_id', $device->id)->firstOrFail();
-
-            $data = Data::all()->where('device_id', $device->id)->where('alias', $type->alias)->splice(($c * $page - $c), $c);
-            $count = Data::all()->where('device_id', $device->id)->where('alias', $type->alias)->count();
-
+        $device = Auth::user()->device($device_id);
+        $type = Auth::user()->typeOfDevice($device_id, $alias_type)->get()->first();
+        if($device && $type){
+            $data = Data::where('alias', $type->alias)->where('device_id', $device->id)->paginate(10);
             return view('listDataOfType', [
-                'count_page' => (int)ceil($count/$c),
-                'showPage' => $page,
                 'device_id' => $device->id,
                 'type_id' => $type->id,
                 'type_name' => $type->name,
                 'items' => $data
             ]);
         }
+        return view('404');
     }
     public function showAllTypeData(Request $request, $alias_type){
-        if (View::exists('listDataOfType')) {
 
-            //Исключил неправильный параметр - если передадут строку, преобразование закончится не 0, а 1.
-            $page = (int)$request->query('page', '1');
-            $page = ($page == 0)? 1 : $page;
 
-            // Пагинация, по 50 элементов
-            $c = 50; // Количество показываемых элементов
+        foreach (Auth::user()->devices as $device){
 
-            foreach (Device::all()->where('user_id', Auth::user()->id) as $device){
-
-                if(TypeData::all()->where('alias', $alias_type)->where('device_id', $device->id)->count() == 1){
-
-                    $type = TypeData::where('alias', $alias_type)->where('device_id', $device->id)->firstOrFail();
-
-                    $data = Data::all()->where('device_id', $device->id)->where('alias', $type->alias)->splice(($c * $page - $c), $c);
-                    $count = Data::all()->where('device_id', $device->id)->where('alias', $type->alias)->count();
-
-                    return view('listDataOfType', [
-                        'count_page' => (int)ceil($count/$c),
-                        'showPage' => $page,
-                        'device_id' => $device->id,
-                        'type_id' => $type->id,
-                        'type_name' => $type->name,
-                        'items' => $data
-                    ]);
-                }
+            $type = $device->typeData($alias_type)->get()->first();
+            if($type){
+                $data = Data::where('device_id', $device->id)->where('alias', $type->alias)->paginate(10);
+                return view('listDataOfType', [
+                    'device_id' => $device->id,
+                    'type_id' => $type->id,
+                    'type_name' => $type->name,
+                    'items' => $data
+                ]);
             }
-
-            return view('404');
-
         }
+
+        return view('404');
 
     }
     public function showTypesData(Request $request)
     {
+        $allTypes = Auth::user()->allTypes()->paginate(10);
 
-        if (View::exists('listTypesOfDevice')) {
-            //Исключил неправильный параметр - если передадут стоку, преобразование закончится не 0, а 1.
-            $page = (int)$request->query('page', '1');
-            $page = ($page == 0)? 1 : $page;
-
-            // Пагинация, по 10 элементов
-
-            $c = 10; // Количество показываемых элементов
-
-            $devices = Device::all()->where('user_id', Auth::user()->id);
-
-            $subArr = [];
-            foreach ($devices as $device){
-                if(TypeData::all()->where('device_id', $device->id)->count() != 0){
-                    foreach (TypeData::all()->where('device_id', $device->id) as $type){
-                        array_push($subArr, [ 'id' => $type->id, 'name' => $type->name, 'alias' => $type->alias, 'description' => $type->description, '	device_id' => $type->device_id ]);
-                    }
-                }
-            }
-            $count = count($subArr);
-
-            $subArr = array_slice($subArr, ($c * $page - $c), $c);
-
-            return view('listTypesOfDevice', [
-                'count_page' => (int)ceil($count/$c),
-                'title' => 'Все типы данных',
-                'all' => 'all', // Маркировка страницы всех типов данных для таблицы
-                'showPage' => $page,
-                'device_id' => null,
-                'device_name' => null,
-                'items' => $subArr
-            ]);
-        }
+        return view('listTypesOfDevice', [
+            'title' => 'Все типы данных',
+            'all' => 'all', // Маркировка страницы всех типов данных для таблицы
+            'device_id' => null,
+            'device_name' => null,
+            'items' => $allTypes
+        ]);
     }
 }

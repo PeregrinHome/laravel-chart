@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Data;
 use App\Device;
 use App\TypeData;
+use App\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ class DevicesController extends Controller
     /**
      * @var Device
      */
-    protected $devices;
+//    protected $devices;
 
     /**
      * DevicesController constructor.
@@ -24,7 +25,7 @@ class DevicesController extends Controller
      */
     public function __construct(Device $devices)
     {
-        $this->devices = $devices;
+//        $this->devices = $devices;
 //        Route::model('device',Device::class);
     }
 
@@ -34,26 +35,10 @@ class DevicesController extends Controller
      */
     public function index(Request $request)
     {
-//        if (View::exists('listDevices')) {
-            //Исключил неправильный параметр - если передадут стоку, преобразование закончится не 0, а 1.
-//            $page = (int)$request->query('page', '1');
-//            $page = ($page == 0)? 1 : $page;
-//
-//            // Пагинация, по 10 элементов
-//
-//            $c = 10; // Количество показываемых элементов
-//
-//            $devices = Device::all()->where('user_id', Auth::user()->id)->splice(($c * $page - $c), $c);
-//            $count = Device::all()->where('user_id', Auth::user()->id)->count();
-
-            $devices = Device::paginate(10);
-
-            return view('listDevices', [
-//                'count_page' => (int)ceil($count/$c),
-//                'showPage' => $page,
-                'items' => $devices
-            ]);
-//        }
+        $devices = Device::where('user_id', Auth::user()->id)->paginate(10);
+        return view('listDevices', [
+            'items' => $devices
+        ]);
     }
     public function getPageCreater()
     {

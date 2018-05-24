@@ -11,12 +11,6 @@
         </div>
     </header>
     <main>
-        {{--@includeIf('templates.pagination',--}}
-        {{--[--}}
-            {{--'count_page' => $count_page,--}}
-            {{--'showPage' => $showPage,--}}
-            {{--'link' => '?page='--}}
-        {{--])--}}
 
         {{ $items->links() }}
         <div class="container">
@@ -36,11 +30,5 @@
 
         @includeIf('templates.modals.modal-all')
         {{ $items->links() }}
-        {{--@includeIf('templates.pagination',--}}
-        {{--[--}}
-            {{--'count_page' => $count_page,--}}
-            {{--'showPage' => $showPage,--}}
-            {{--'link' => '?page='--}}
-        {{--])--}}
     </main>
 @endsection

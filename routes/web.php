@@ -82,16 +82,16 @@ Route::group(['middleware' => ['web','auth'], 'prefix' => 'devices'], function (
 //
 Route::group(['middleware' => ['web','auth'], 'prefix' => 'service'], function () {
 
-    /**
-     * delete
-     */
-    Route::resource('/', 'ServiceController');
-    /**
-     * services.fires.index
-     * services.show
-     * services.store
-     * route(.services.index.)
-     */
+//    /**
+//     * delete
+//     */
+//    Route::resource('/', 'ServiceController');
+//    /**
+//     * services.fires.index
+//     * services.show
+//     * services.store
+//     * route(.services.index.)
+//     */
 
     Route::get('/', 'ServiceController@index');
 

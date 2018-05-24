@@ -11,15 +11,7 @@
         </div>
     </header>
     <main>
-        {{--<div style="display: none;">--}}
-        {{--<input type="hidden" class="meta device_id" value="{{ $device_id ?? null }}">--}}
-        {{--</div>--}}
-        @includeIf('templates.pagination',
-        [
-            'count_page' => $count_page,
-            'showPage' => $showPage,
-            'link' => '?page='
-        ])
+        {{ $items->links() }}
 
         <div class="container">
             <div class="row">
@@ -38,11 +30,6 @@
 
         @includeIf('templates.modals.modal-all')
 
-        @includeIf('templates.pagination',
-        [
-            'count_page' => $count_page,
-            'showPage' => $showPage,
-            'link' => '?page='
-        ])
+        {{ $items->links() }}
     </main>
 @endsection

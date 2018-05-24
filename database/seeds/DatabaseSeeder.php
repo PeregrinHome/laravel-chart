@@ -15,13 +15,14 @@ class DatabaseSeeder extends Seeder
 
         // На этом этапе регистрация пользователя, а только потом остальные сиды
 
-        $this->call(DevicesTableSeeder::class);
+//        $this->call(DevicesTableSeeder::class);
 //        $this->call(DataAliasesTableSeeder::class);
 //        $this->call(DataTableSeeder::class);
 
+        //Такой таблицы нет
 //        $this->call(GroupsGraphicsTableSeeder::class);
 
-//        $this->call(TimeGraphicsTableSeeder::class);
+        $this->call(TimeGraphicsTableSeeder::class);
 //        $this->call(LineTimeGraphicsTableSeeder::class);
 
 

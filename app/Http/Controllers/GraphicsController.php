@@ -19,25 +19,11 @@ class GraphicsController extends Controller
 {
     public function index(Request $request)
     {
-        if (View::exists('listGraphics')) {
-            //Исключил неправильный параметр - если передадут стоку, преобразование закончится не 0, а 1.
-            $page = (int)$request->query('page', '1');
-            $page = ($page == 0)? 1 : $page;
-
-            // Пагинация, по 10 элементов
-
-            $c = 10; // Количество показываемых элементов
-
-            $grathics = TimeGraphic::all()->where('user_id', 'user_id', Auth::user()->id)->splice(($c * $page - $c), $c);
-            $count = TimeGraphic::all()->where('user_id', 'user_id', Auth::user()->id)->count();
-
-            return view('listGraphics', [
-                'count_page' => (int)ceil($count/$c),
-                'title' => 'Графики',
-                'showPage' => $page,
-                'items' => $grathics
-            ]);
-        }
+        $graphics = Auth::user()->graphics()->paginate(10);
+        return view('listGraphics', [
+            'title' => 'Графики',
+            'items' => $graphics
+        ]);
     }
     public function getPageCreater(Request $request)
     {
