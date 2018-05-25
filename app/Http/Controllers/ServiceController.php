@@ -26,10 +26,10 @@ class ServiceController extends Controller
     {
         switch ($request->input('get')) {
             case 'token':
-                return response()->json(ServiceController::getToken(Auth::user()->id, $request->input('id'), $request->input('target')));
+                return response()->json(ServiceController::getToken(Auth::user(), $request->input('id'), $request->input('target')));
                 break;
             case 'graphic':
-                return response()->json(ServiceController::getGraphic(Auth::user()->id, $request->input('id'), $request->input('target')));
+                return response()->json(ServiceController::getGraphic(Auth::user(), $request->input('id'), $request->input('target')));
                 break;
             default:
                 return response()->json(['res' => 'fail']);
@@ -41,20 +41,20 @@ class ServiceController extends Controller
     {
         switch ($request->input('target')) {
             case 'device':
-                return response()->json(ServiceController::postDevice(Auth::user()->id, $request->all('token', 'device_id', 'description', 'name')));
+                return response()->json(ServiceController::postDevice(Auth::user(), $request->all('token', 'device_id', 'description', 'name')));
                 break;
             case 'typeofdevice':
-                return response()->json(ServiceController::postTypeOfData(Auth::user()->id, $request->all('alias', 'device_id', 'description', 'name')));
+                return response()->json(ServiceController::postTypeOfData(Auth::user(), $request->all('alias', 'device_id', 'description', 'name')));
                 break;
             case 'timegraphic':
-                return response()->json(ServiceController::postTimeGraphic(Auth::user()->id, $request->all()));
+                return response()->json(ServiceController::postTimeGraphic(Auth::user(), $request->all()));
                 break;
             case 'data':
-                return response()->json(ServiceController::postData(Auth::user()->id, $request->all()));
+                return response()->json(ServiceController::postData(Auth::user(), $request->all()));
                 break;
             default:
-//                return response()->json(['res' => 'fail']);
-                return response()->json($request->all());
+                return response()->json(['res' => 'fail']);
+//                return response()->json($request->all());
                 break;
         }
 
@@ -64,7 +64,7 @@ class ServiceController extends Controller
     {
         switch ($request->input('target')) {
             case 'device':
-                return response()->json(ServiceController::updateDevice(Auth::user()->id, $request->all('token', 'device_id', 'description', 'name')));
+                return response()->json(ServiceController::updateDevice(Auth::user(), $request->all('token', 'device_id', 'description', 'name')));
                 break;
             case 'typeofdevice':
                 return response()->json(ServiceController::updateTypeOfData(Auth::user(), $request->all('alias', 'device_id', 'description', 'name', 'typeofdevice_id')));
@@ -73,8 +73,8 @@ class ServiceController extends Controller
                 return response()->json(ServiceController::updateTimeGraphic(Auth::user(), $request->all()));
                 break;
             default:
-//                return response()->json(['res' => 'fail']);
-                return response()->json($request->all());
+                return response()->json(['res' => 'fail']);
+//                return response()->json($request->all());
                 break;
         }
     }
@@ -84,19 +84,19 @@ class ServiceController extends Controller
 
         switch ($request->input('target')) {
             case 'device':
-                return response()->json(ServiceController::delDevice(Auth::user()->id, $request->input('id')));
+                return response()->json(ServiceController::delDevice(Auth::user(), $request->input('id')));
                 break;
             case 'typeofdata':
-                return response()->json(ServiceController::delTypeOfData(Auth::user()->id, $request->input('id')));
+                return response()->json(ServiceController::delTypeOfData(Auth::user(), $request->input('id')));
                 break;
             case 'data':
-                return response()->json(ServiceController::delData(Auth::user()->id, $request->input('id')));
+                return response()->json(ServiceController::delData(Auth::user(), $request->input('id')));
                 break;
             case 'all_data':
-                return response()->json(ServiceController::delAllData(Auth::user()->id, $request->all()));
+                return response()->json(ServiceController::delAllData(Auth::user(), $request->all()));
                 break;
             case 'timegraphic':
-                return response()->json(ServiceController::delTimeGraphic(Auth::user()->id, $request->input('id')));
+                return response()->json(ServiceController::delTimeGraphic(Auth::user(), $request->input('id')));
                 break;
             default:
                 return response()->json(['res' => 'fail']);
@@ -105,24 +105,26 @@ class ServiceController extends Controller
 
     }
 
-    public function updateDevice($user_id, $all)
+    public function updateDevice($user, $all)
     {
-
-        $target = Device::where('id', '=', $all['device_id'])->where('user_id', $user_id)->firstOrFail();
-        $target->update(['name' => $all['name'], 'description' => $all['description'], 'token' => $all['token']]);
-        return [
-            'res' => 'ok',
-            'callback' => [
-                'type' => 'confirmed'
-            ],
-            'mes' => 'Устройство "' . $all['name'] . '" обновлено!'
-        ];
+        $device = $user->devices()->find($all['device_id']);
+        if($device){
+            $device->update(['name' => $all['name'], 'description' => $all['description'], 'token' => $all['token']]);
+            return [
+                'res' => 'ok',
+                'callback' => [
+                    'type' => 'confirmed'
+                ],
+                'mes' => 'Устройство "' . $device->name . '" обновлено!'
+            ];
+        }
+        return ['res' => 'fail'];
     }
 
-    public function postDevice($user_id, $all)
+    public function postDevice($user, $all)
     {
 
-        Device::Create(['user_id' => $user_id, 'name' => $all['name'], 'description' => $all['description'], 'token' => $all['token']]);
+        Device::create(['user_id' => $user->id, 'name' => $all['name'], 'description' => $all['description'], 'token' => $all['token']]);
         return [
             'res' => 'ok',
             'callback' => [
@@ -132,94 +134,82 @@ class ServiceController extends Controller
         ];
     }
 
-    public function postTypeOfData($user_id, $all)
+    public function postTypeOfData($user, $all)
     {
-        $device = Device::where('id', $all['device_id'])->where('user_id', $user_id)->firstOrFail();
-
-        if(TypeData::all()->where('device_id', $device->id)->where('alias', $all['alias'])->count() == 0){
-            TypeData::Create(['device_id' => $device->id, 'name' => $all['name'], 'description' => $all['description'], 'alias' => $all['alias']]);
-            return [
-                'res' => 'ok',
-                'callback' => [
-                    'type' => 'saveTypeOfDevice'
-                ],
-                'mes' => 'Тип данных "' . $all['name'] . '" добален!'
-            ];
-        }else{
-            return [
-                'res' => 'ok',
-                'callback' => [
-                    'type' => 'notconfirmed'
-                ],
-                'mes' => 'Совпадение псевдонимов недопустимо!'
-            ];
+        $device = $user->devices()->find($all['device_id']);
+        if($device){
+            if(TypeData::where('device_id', $device->id)->where('alias', $all['alias'])->get()->count() == 0){
+                TypeData::create(['device_id' => $device->id, 'name' => $all['name'], 'description' => $all['description'], 'alias' => $all['alias']]);
+                return [
+                    'res' => 'ok',
+                    'callback' => [
+                        'type' => 'saveTypeOfDevice'
+                    ],
+                    'mes' => 'Тип данных "' . $all['name'] . '" добален!'
+                ];
+            }else{
+                return [
+                    'res' => 'ok',
+                    'callback' => [
+                        'type' => 'notconfirmed'
+                    ],
+                    'mes' => 'Совпадение псевдонимов недопустимо!'
+                ];
+            }
         }
-
-
+        return ['res' => 'fail'];
     }
 
-    public function postData($user_id, $all)
+    public function postData($user, $all)
     {
 
         if($all['rol'] == 'demo'){
-
-            foreach (Device::all()->where('user_id', $user_id) as $device){
-
-                foreach (TypeData::all()->where('device_id', $device->id) as $type_device){
-
-                    if($type_device->id == $all['id']){
-
-                        for ($i = 1; $i <= 100; $i++){
-//                            Data::firstOrCreate(['device_id' => $device->id, 'value' => rand(5, 200), 'alias' => $type_device->alias, 'time' => (new Date(1519731325, new DateTimeZone('Europe/Moscow')))->add($i.' hour')->format('U')]);
-                            Data::firstOrCreate(['device_id' => $device->id, 'value' => rand(5, 200), 'alias' => $type_device->alias, 'time' => (new Date(1519731325))->add($i.' hour')->format('U')]);
-                        }
-
-                        return [
-                            'res' => 'ok',
-                            'callback' => [
-                                'type' => 'add_demo_data'
-                            ],
-                            'mes' => 'Демо данные добавлены.'
-                        ];
-
-                    }
-
+            $type = $user->allTypes()->find($all['id']);
+            if($type){
+                date_default_timezone_set("UTC");
+                $save = [];
+                for ($i = 1; $i <= 100; $i++){
+                    $save[] = ['device_id' => $type->device_id, 'value' => rand(5, 200), 'alias' => $type->alias, 'time' => (new Date())->add($i.' hour')->format('U')];
                 }
-
+                $type->data()->createMany($save);
+                return [
+                    'res' => 'ok',
+                    'callback' => [
+                        'type' => 'add_demo_data'
+                    ],
+                    'mes' => 'Демо данные добавлены.'
+                ];
             }
-
-            return [
-                'res' => 'ok',
-                'callback' => [
-                    'type' => 'notconfirmed'
-                ],
-                'mes' => 'Добавить демо данные не удалось!'
-            ];
-
         }
 
+        return [
+            'res' => 'ok',
+            'callback' => [
+                'type' => 'notconfirmed'
+            ],
+            'mes' => 'Добавить демо данные не удалось!'
+        ];
     }
 
-    public function postTimeGraphic($user_id, $all)
+    public function postTimeGraphic($user, $all)
     {
+        $user_id = $user->id;
+        if(TimeGraphic::where('user_id', $user_id)->where('alias', $all['alias'])->get()->count() == 0){
 
-        if(TimeGraphic::all()->where('user_id', $user_id)->where('alias', $all['alias'])->count() == 0){
-
-//            $time_graphic = TimeGraphic::firstOrCreate(['name' => $all['name'], 'description' => $all['description'], 'alias' => $all['alias'], 'user_id' => $user_id, 'border_time' => (($all['border_time'] == null)? 0 : ((new Date($all['border_time'].' 00:00:00', new DateTimeZone('Europe/Moscow')))->format('U')))]);
-            $time_graphic = TimeGraphic::firstOrCreate(['name' => $all['name'], 'description' => $all['description'], 'alias' => $all['alias'], 'user_id' => $user_id, 'border_time' => (($all['border_time'] == null)? 0 : ((new Date($all['border_time'].' 00:00:00'))->format('U')))]);
+            $time_graphic = TimeGraphic::create(['name' => $all['name'], 'description' => $all['description'], 'alias' => $all['alias'], 'user_id' => $user_id, 'border_time' => (($all['border_time'] == null)? 0 : ((new Date($all['border_time'].' 00:00:00'))->format('U')))]);
 
             if(! empty($all['time_line']) ){
 
                 for($i = 0; $i < count($all['time_line']); $i += 3){
 
-                    LineTimeGraphic::firstOrCreate(['graphics_id' => $time_graphic->id, 'name' => $all['time_line'][$i], 'data_alias' => $all['time_line'][$i+1], 'color' => $all['time_line'][$i+2]]);
+                    LineTimeGraphic::create(['graphics_id' => $time_graphic->id, 'name' => $all['time_line'][$i], 'data_alias' => $all['time_line'][$i+1], 'color' => $all['time_line'][$i+2]]);
 
                 }
 
             }
 
             if(! empty($all['favorites']) ){
-                FavoriteTimeGraphics::firstOrCreate(['time_graphic_id' => $time_graphic->id]);
+                FavoriteTimeGraphics::create(['time_graphic_id' => $time_graphic->id]);
             }
 
             return [
@@ -304,35 +294,29 @@ class ServiceController extends Controller
                     'mes' => 'Обновить тип данных не удалось!'
                 ];
             }
-//        $target = TypeData::where('id', $all['typeofdevice_id'])->firstOrFail();
-//
-//        Device::where('id', $target->device_id)->where('user_id', $user_id)->firstOrFail();
-//
-//        $device = Device::where('id', $all['device_id'])->where('user_id', $user_id)->firstOrFail();
-//
-//        $target->update(['device_id' => $device->id, 'name' => $all['name'], 'description' => $all['description'], 'alias' => $all['alias']]);
-
 
     }
 
-    public function getToken($user_id, $device_id, $target)
+    public function getToken($user, $device_id, $target)
     {
-
-
         switch ($target) {
             case 'device':
-                $target = Device::where('id', $device_id)->where('user_id', $user_id)->firstOrFail();
-                $target_id = $target->id;
-                $target_token = $target->token;
-                return [
-                    'res' => 'ok',
-                    'callback' => [
-                        'type' => 'showToken',
-                        'name' => 'device',
-                        'id' => $target_id
-                    ],
-                    'mes' => $target_token
-                ];
+                $device = $user->device($device_id);
+                if($target){
+                    $device_id = $device->id;
+                    $device_token = $device->token;
+                    return [
+                        'res' => 'ok',
+                        'callback' => [
+                            'type' => 'showToken',
+                            'name' => 'device',
+                            'id' => $device_id
+                        ],
+                        'mes' => $device_token
+                    ];
+                }else{
+                    return ['res' => 'fail'];
+                }
                 break;
             default:
                 return ['res' => 'fail'];
@@ -345,40 +329,27 @@ class ServiceController extends Controller
         return $data->time;
     }
 
-    public function getGraphic($user_id, $graphic_id, $target)
+    public function getGraphic($user, $graphic_id, $target)
     {
-
-
         switch ($target) {
             case 'timegraphic_simple':
-
-                $timegraphic = TimeGraphic::where('user_id', $user_id)->where('id', $graphic_id[0])->firstOrFail();
+                $timegraphic = $user->graphics()->findOrFail($graphic_id[0]);
 
                 $data = [];
 
-                foreach (LineTimeGraphic::all()->where('graphics_id', $timegraphic->id) as $time_line){
+                foreach (LineTimeGraphic::where('graphics_id', $timegraphic->id)->get() as $time_line){
 
                     $arrdata = [];
 
-                    foreach (Device::all()->where('user_id', $user_id) as $device){
+                    $data_unsorted = $user->allTypes()->where('alias', $time_line->data_alias)->get()->first()->data()->where('time', '>', $timegraphic->border_time)->get();
+                    $data_sorted = $data_unsorted->sortBy("time");
+                    foreach ($data_sorted as $one_data){
 
-                        foreach (TypeData::all()->where('device_id', $device->id)->where('alias', $time_line->data_alias) as $type_data){
-
-                            $data_unsorted = Data::all()->where('device_id', $device->id)->where('alias', $type_data->alias)->where('time', '>', $timegraphic->border_time);
-
-                            $data_sorted = $data_unsorted->sortBy("time");
-
-                            foreach ($data_sorted as $one_data){
-
-                                array_push($arrdata, [ $one_data->time * 1000, $one_data->value ]);
-
-                            }
-
-                        }
+                        $arrdata[] = [ $one_data->time * 1000, $one_data->value ];
 
                     }
 
-                    array_push($data, [ 'name' => $time_line->name, 'data' => $arrdata, 'color' => $time_line->color ]);
+                    $data[] = [ 'name' => $time_line->name, 'data' => $arrdata, 'color' => $time_line->color ];
 
                 }
 
@@ -404,37 +375,27 @@ class ServiceController extends Controller
 
                 foreach ($graphic_id as $g_id){
 
-                    $timegraphic = TimeGraphic::where('user_id', $user_id)->where('id', $g_id)->firstOrFail();
+                    $timegraphic = $user->graphics()->findOrFail($g_id);
 
                     $data = [];
 
-                    foreach (LineTimeGraphic::all()->where('graphics_id', $timegraphic->id) as $time_line){
+                    foreach (LineTimeGraphic::where('graphics_id', $timegraphic->id)->get() as $time_line){
 
                         $arrdata = [];
 
-                        foreach (Device::all()->where('user_id', $user_id) as $device){
+                        $data_unsorted = $user->allTypes()->where('alias', $time_line->data_alias)->get()->first()->data()->where('time', '>', $timegraphic->border_time)->get();
+                        $data_sorted = $data_unsorted->sortBy("time");
+                        foreach ($data_sorted as $one_data){
 
-                            foreach (TypeData::all()->where('device_id', $device->id)->where('alias', $time_line->data_alias) as $type_data){
-
-                                $data_unsorted = Data::all()->where('device_id', $device->id)->where('alias', $type_data->alias)->where('time', '>', $timegraphic->border_time);
-
-                                $data_sorted = $data_unsorted->sortBy("time");
-
-                                foreach ($data_sorted as $one_data){
-
-                                    array_push($arrdata, [ $one_data->time * 1000, $one_data->value ]);
-
-                                }
-
-                            }
+                            $arrdata[] = [ $one_data->time * 1000, $one_data->value ];
 
                         }
 
-                        array_push($data, [ 'name' => $time_line->name, 'data' => $arrdata, 'color' => $time_line->color ]);
+                        $data[] = [ 'name' => $time_line->name, 'data' => $arrdata, 'color' => $time_line->color ];
 
                     }
 
-                    array_push($target, ['selector' => ('timegraphic-'.$timegraphic->id), 'title' => $timegraphic->name, 'data' => $data, 'mes' => 'График "'.$timegraphic->name.'" сформирован!']);
+                    $target[] = ['selector' => ('timegraphic-'.$timegraphic->id), 'title' => $timegraphic->name, 'data' => $data, 'mes' => 'График "'.$timegraphic->name.'" сформирован!'];
 
                 }
 
@@ -454,133 +415,99 @@ class ServiceController extends Controller
 
     }
 
-    public function delDevice($user_id, $device_id)
+    public function delDevice($user, $device_id)
     {
-
-        $target = Device::where('id', '=', $device_id)->where('user_id', $user_id)->firstOrFail();
-
-        $target_id = $target->id;
-        $target_name = $target->name;
-        Device::destroy($target_id);
-
-        return [
-            'res' => 'ok',
-            'callback' => [
-                'type' => 'remove',
-                'name' => 'device',
-                'id' => $target_id
-            ],
-            'mes' => 'Устройство "' . $target_name . '" удалено!'
-        ];
+        $device = $user->devices()->find($device_id);
+        if($device){
+            $device_id = $device->id;
+            $device_name = $device->name;
+            $device->delete();
+            return [
+                'res' => 'ok',
+                'callback' => [
+                    'type' => 'remove',
+                    'name' => 'device',
+                    'id' => $device_id
+                ],
+                'mes' => 'Устройство "' . $device_name . '" удалено!'
+            ];
+        }
+        return ['res' => 'fail'];
     }
 
-    public function delTypeOfData($user_id, $id_typeofdata)
+    public function delTypeOfData($user, $id_typeofdata)
     {
+        $type = $user->allTypes()->find($id_typeofdata);
 
-        foreach (Device::all()->where('user_id', $user_id) as $device){
+        if($type){
+            $type_id = $type->id;
+            $type_name = $type->name;
+            $type->delete();
+            return [
+                'res' => 'ok',
+                'callback' => [
+                    'type' => 'remove',
+                    'name' => 'typeofdata',
+                    'id' => $type_id
+                ],
+                'mes' => 'Тип данных "' . $type_name . '" удалено!'
+            ];
+        }
 
-            foreach (TypeData::all()->where('device_id', $device->id) as $target){
+        return ['res' => 'fail'];
+    }
 
-                if($target->id == $id_typeofdata){
-                    $target_id = $target->id;
-                    $target_name = $target->name;
-
-                    TypeData::destroy($target_id);
+    public function delData($user, $data_id)
+    {
+            $data = Data::find($data_id);
+            if($data){
+                $device = $user->devices()->find($data->device_id);
+                if($device){
+                    $data_id = $data->id;
+                    $data_created_at = $data->created_at;
+                    $data->delete();
                     return [
                         'res' => 'ok',
                         'callback' => [
                             'type' => 'remove',
-                            'name' => 'typeofdata',
-                            'id' => $target_id
+                            'name' => 'data',
+                            'id' => $data_id
                         ],
-                        'mes' => 'Тип данных "' . $target_name . '" удалено!'
+                        'mes' => 'Данные за "' . $data_created_at . '" удалено!'
                     ];
                 }
-
             }
-
-        }
 
         return ['res' => 'fail'];
     }
 
-    public function delData($user_id, $data_id)
+    public function delAllData($user, $all)
     {
-
-        foreach (Device::all()->where('user_id', $user_id) as $device){
-
-            foreach (TypeData::all()->where('device_id', $device->id) as $type){
-
-                foreach (Data::all()->where('alias', $type->alias)->where('device_id', $device->id) as $target){
-
-                    if($target->id == $data_id){
-                        $target_id = $target->id;
-                        $target_created_at = $target->created_at;
-                        Data::destroy($target_id);
-
-                        return [
-                            'res' => 'ok',
-                            'callback' => [
-                                'type' => 'remove',
-                                'name' => 'data',
-                                'id' => $target_id
-                            ],
-                            'mes' => 'Данные за "' . $target_created_at . '" удалено!'
-                        ];
-
-                    }
-
-                }
-
-            }
-
+        $type = $user->allTypes()->find($all['id']);
+        if($type){
+            Data::where('device_id', $type->device_id)->where('alias', $type->alias)->delete();
+            return [
+                'res' => 'ok',
+                'callback' => [
+                    'type' => 'add_demo_data'
+                ],
+                'mes' => 'Все данные удалены.'
+            ];
+        }else{
+            return [
+                'res' => 'ok',
+                'callback' => [
+                    'type' => 'notconfirmed'
+                ],
+                'mes' => 'Удалить все данные не удалось!'
+            ];
         }
-
-        return ['res' => 'fail'];
     }
 
-    public function delAllData($user_id, $all)
+    public function delTimeGraphic($user, $id)
     {
 
-
-
-        foreach (Device::all()->where('user_id', $user_id) as $device){
-
-            foreach (TypeData::all()->where('device_id', $device->id) as $type_device){
-
-                if($type_device->id == $all['id']){
-
-                    $data = Data::all()->where('alias', $type_device->alias)->where('device_id', $device->id)->modelKeys();
-                    Data::destroy($data);
-
-                    return [
-                        'res' => 'ok',
-                        'callback' => [
-                            'type' => 'add_demo_data'
-                        ],
-                        'mes' => 'Все данные удалены.'
-                    ];
-
-                }
-
-            }
-
-        }
-
-        return [
-            'res' => 'ok',
-            'callback' => [
-                'type' => 'notconfirmed'
-            ],
-            'mes' => 'Удалить все данные не удалось!'
-        ];
-
-    }
-
-    public function delTimeGraphic($user_id, $id)
-    {
-
-        $target = TimeGraphic::where('id', $id)->where('user_id', $user_id)->firstOrFail();
+        $target = TimeGraphic::where('id', $id)->where('user_id', $user->id)->firstOrFail();
 
         $target_id = $target->id;
         $target_name = $target->name;
