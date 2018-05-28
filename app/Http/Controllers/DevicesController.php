@@ -50,9 +50,11 @@ class DevicesController extends Controller
             'description' => null
         ]);
     }
+//    public function getPageUpdate(Device $device)
     public function getPageUpdate($id_device)
     {
         $device = Auth::user()->device($id_device);
+
 
         if($device){
             return view('createDevice', [

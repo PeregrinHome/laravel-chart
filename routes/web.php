@@ -52,9 +52,13 @@ Route::group(['middleware' => ['web','auth']], function () {
 Route::group(['middleware' => ['web','auth'], 'prefix' => 'devices'], function () {
 
     // Страница создания устройства
+    //name('devices.create')
     Route::get('create', 'DevicesController@getPageCreater')->name('route_devices_create');
 
     Route::get('create/{id_device}', 'DevicesController@getPageUpdate')->name('route_devices_update');
+//    Route::get('{device}/edit','DevicesController@edit')->name('devices.edit');
+//    Route::patch('{device}','DevicesController@update')->name('devices.update');
+//    Route::delete('{device}','DevicesController@update')->name('devices.update');
 
 //    Route::get('/{alias_devices}', 'DevicesController@showDevice')->name('route_device_show');
 

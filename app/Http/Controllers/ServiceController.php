@@ -341,6 +341,7 @@ class ServiceController extends Controller
 
                     $arrdata = [];
 
+                    //TODO: Пагинация тут необходима, но пока оставим так.
                     $data_unsorted = $user->allTypes()->where('alias', $time_line->data_alias)->get()->first()->data()->where('time', '>', $timegraphic->border_time)->get();
                     $data_sorted = $data_unsorted->sortBy("time");
                     foreach ($data_sorted as $one_data){

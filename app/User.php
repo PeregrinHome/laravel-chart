@@ -38,6 +38,7 @@ class User extends Authenticatable
     public function graphics()
     {
         return $this->hasMany('App\TimeGraphic');
+//        return $this->hasMany(TimeGraphic::class);
     }
     public function allTypes()
     {
