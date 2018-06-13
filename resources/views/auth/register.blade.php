@@ -51,10 +51,10 @@
 
                         <div class="col s12 m6">
                             <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }} />
-                            <label for="remember">Remember Me</label>
+                                <label for="remember">Запомнить</label>
                         </div>
                         <div class="col s12 m6 right-align">
-                            <button class="btn waves-effect waves-light" type="submit">Register
+                            <button class="btn waves-effect waves-light" type="submit">Регистрация
                                 <i class="material-icons left">send</i>
                             </button>
                         </div>

@@ -10080,6 +10080,18 @@ p {
           user-select: none;
 }
 
+@media (max-width: 670px) {
+  .pagination > li {
+    display: none;
+  }
+
+  .pagination > li.pagination__arrow--first,
+  .pagination > li.pagination__arrow--last,
+  .pagination > li.pagination__current {
+    display: inline-block;
+  }
+}
+
 .d-flex {
   display: -webkit-box;
   display: -ms-flexbox;

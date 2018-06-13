@@ -33,7 +33,7 @@
                         <label for="remember">Запомнить</label>
                     </div>
                     <div class="col s12 m6 right-align">
-                        <button class="btn waves-effect waves-light" type="submit">Login
+                        <button class="btn waves-effect waves-light" type="submit">Войти
                             <i class="material-icons left">send</i>
                         </button>
                     </div>

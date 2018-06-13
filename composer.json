@@ -15,7 +15,6 @@
         "laravel/framework": "5.5.*",
         "laravel/horizon": "^1.1",
         "laravel/tinker": "~1.0",
-        "nesbot/carbon": "^1.29",
         "sentry/sentry-laravel": "^0.8.0"
     },
     "suggest": {
